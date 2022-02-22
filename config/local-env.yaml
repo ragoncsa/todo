@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+database:
+  host: localhost
+  port: 5432
+  dbname:  postgres
+  dbuser: postgres
+  dbpassword: password
+  timezone: "Europe/Helsinki"
