@@ -5,10 +5,9 @@ import (
 
 	"github.com/ragoncsa/todo/config"
 	"github.com/ragoncsa/todo/domain"
+	"github.com/ragoncsa/todo/gorm"
 
 	"github.com/spf13/viper"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func loadConfig() *config.Config {
@@ -30,14 +29,7 @@ func loadConfig() *config.Config {
 
 func main() {
 	conf := loadConfig()
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=%s",
-		conf.Database.Host,
-		conf.Database.DBUser,
-		conf.Database.DBPassword,
-		conf.Database.DBName,
-		conf.Database.Port,
-		conf.Database.Timezone)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Connect(conf)
 	if err != nil {
 		panic("failed to connect database")
 	}
