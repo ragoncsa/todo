@@ -11,14 +11,13 @@ type TaskService struct {
 
 func (s *TaskService) Task(id int) (*domain.Task, error) {
 	var t domain.Task
-	s.DB.First(&t, id)
-	return &t, nil
+	tx := s.DB.First(&t, id)
+	return &t, tx.Error
 }
 
 func (s *TaskService) CreateTask(t *domain.Task) error {
-	s.DB.Create(t)
-	// error ?
-	return nil
+	tx := s.DB.Create(t)
+	return tx.Error
 }
 
 func (s *TaskService) Tasks() ([]*domain.Task, error) {
