@@ -18,6 +18,6 @@ type Task struct {
 type TaskService interface {
 	Task(id int) (*Task, error)
 	Tasks() ([]*Task, error)
-	CreateTask(u *Task) error
+	CreateTask(t *Task) error
 	DeleteTask(id int) error
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/ragoncsa/todo/config"
-	"github.com/ragoncsa/todo/domain"
 	"github.com/ragoncsa/todo/gorm"
+	"github.com/ragoncsa/todo/http"
 
 	"github.com/spf13/viper"
 )
@@ -35,7 +35,18 @@ func main() {
 	}
 	gorm.RunMigration(db)
 
-	ts := &gorm.TaskService{DB: db}
-	ts.CreateTask(&domain.Task{Name: "my-task2"})
+	tsDB := &gorm.TaskService{DB: db}
+
+	server := http.InitServer()
+
+	tsHTTP := http.TaskService{
+		Server:  server,
+		Service: tsDB,
+	}
+	tsHTTP.RegisterRoutes()
+
+	http.StartServer(server)
+
+	// ts.CreateTask(&domain.Task{Name: "my-task2"})
 
 }

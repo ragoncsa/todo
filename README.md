@@ -1,6 +1,6 @@
 # todo
 
-### Set up database
+## Set up database
 
 Also see: <https://hub.docker.com/_/postgres>
 
@@ -12,3 +12,11 @@ root@187961c81d2e:/# psql -U postgres
 psql (14.2 (Debian 14.2-1.pgdg110+1))
 Type "help" for help.
 ```
+
+## Start the server
+
+go run main.go
+
+## Test the service
+
+`curl -X POST localhost:8080/tasks/ --data "taskname=hello1"`
