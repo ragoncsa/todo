@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ragoncsa/todo/config"
+	"github.com/ragoncsa/todo/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,4 +18,8 @@ func Connect(conf *config.Config) (db *gorm.DB, err error) {
 		conf.Database.Port,
 		conf.Database.Timezone)
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+}
+
+func RunMigration(db *gorm.DB) error {
+	return db.AutoMigrate(&domain.Task{})
 }

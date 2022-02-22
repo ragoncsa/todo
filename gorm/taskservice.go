@@ -20,3 +20,11 @@ func (s *TaskService) CreateTask(t *domain.Task) error {
 	// error ?
 	return nil
 }
+
+func (s *TaskService) Tasks() ([]*domain.Task, error) {
+	return nil, nil
+}
+
+func (s *TaskService) DeleteTask(id int) error {
+	return nil
+}

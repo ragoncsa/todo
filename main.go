@@ -33,11 +33,9 @@ func main() {
 	if err != nil {
 		panic("failed to connect database")
 	}
+	gorm.RunMigration(db)
 
-	// Migrate the schema
-	db.AutoMigrate(&domain.Task{})
-
-	// Create
-	db.Create(&domain.Task{Name: "my-task"})
+	ts := &gorm.TaskService{DB: db}
+	ts.CreateTask(&domain.Task{Name: "my-task2"})
 
 }
