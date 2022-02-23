@@ -19,4 +19,14 @@ go run main.go
 
 ## Test the service
 
+### curl
+
 `curl -X POST localhost:8080/tasks/ --data "taskname=hello1"`
+
+`curl -X GET localhost:8080/tasks/20`
+
+### httpie
+
+`http POST localhost:8080/tasks/ taskname=hello1`
+
+`http GET localhost:8080/tasks/1`

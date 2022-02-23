@@ -46,7 +46,4 @@ func main() {
 	tsHTTP.RegisterRoutes()
 
 	http.StartServer(server)
-
-	// ts.CreateTask(&domain.Task{Name: "my-task2"})
-
 }
