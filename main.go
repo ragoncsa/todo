@@ -35,15 +35,11 @@ func main() {
 	}
 	gorm.RunMigration(db)
 
-	tsDB := &gorm.TaskService{DB: db}
-
 	server := http.InitServer()
-
+	tsDB := &gorm.TaskService{DB: db}
 	tsHTTP := http.TaskService{
-		Server:  server,
 		Service: tsDB,
 	}
-	tsHTTP.RegisterRoutes()
-
-	http.StartServer(server)
+	server.RegisterRoutes(&tsHTTP)
+	server.Start()
 }

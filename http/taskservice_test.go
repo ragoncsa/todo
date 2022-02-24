@@ -26,9 +26,9 @@ func TestHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/tasks/100", nil)
 
-	router := InitServer()
-	router.HandleFunc("/tasks/{taskid}", tsHTTP.GetTask)
-	router.ServeHTTP(w, r)
+	server := InitServer()
+	server.RegisterRoutes(tsHTTP)
+	server.router.ServeHTTP(w, r)
 
 	// Validate mock.
 	if !ts.TaskInvoked {

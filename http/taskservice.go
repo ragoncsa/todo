@@ -17,15 +17,6 @@ type JsonResponse struct {
 
 type TaskService struct {
 	Service domain.TaskService
-	Server  *mux.Router
-}
-
-func (t *TaskService) RegisterRoutes() {
-	t.Server.HandleFunc("/tasks/", t.GetTasks).Methods("GET")
-	t.Server.HandleFunc("/tasks/{taskid}", t.GetTask).Methods("GET")
-	t.Server.HandleFunc("/tasks/", t.CreateTask).Methods("POST")
-	t.Server.HandleFunc("/tasks/{taskid}", t.DeleteTask).Methods("DELETE")
-	t.Server.HandleFunc("/tasks/", t.DeleteTasks).Methods("DELETE")
 }
 
 func (t *TaskService) GetTasks(w http.ResponseWriter, r *http.Request) {
