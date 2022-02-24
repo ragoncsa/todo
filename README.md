@@ -27,6 +27,10 @@ go run main.go
 
 ### httpie
 
-`http POST localhost:8080/tasks/ taskname=hello1`
+`http POST --form localhost:8080/tasks/ taskname=hello1`
 
 `http GET localhost:8080/tasks/1`
+
+### Run tests
+
+go test ./...
