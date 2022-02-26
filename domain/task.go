@@ -5,7 +5,7 @@ import (
 )
 
 type Task struct {
-	ID          uint `gorm:"primarykey"`
+	ID          int `gorm:"primarykey"`
 	UserId      string
 	Name        string
 	Description string
@@ -20,4 +20,5 @@ type TaskService interface {
 	Tasks() ([]*Task, error)
 	CreateTask(t *Task) error
 	DeleteTask(id int) error
+	DeleteTasks() error
 }

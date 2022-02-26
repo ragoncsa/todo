@@ -19,17 +19,35 @@ go run main.go
 
 ## Test the service
 
-### curl
+### Create a task
 
 `curl -X POST -H 'Content-Type: application/json' localhost:8080/tasks/ -d '{"name": "hello1"}'`
 
-`curl -X GET localhost:8080/tasks/20`
+`http POST localhost:8080/tasks/ name=hello1`
 
-### httpie
+### Get a task
 
-`http POST localhost:8080/tasks/ taskname=hello1`
+`curl -X GET localhost:8080/tasks/1`
 
 `http GET localhost:8080/tasks/1`
+
+### Get all tasks
+
+`curl -X GET localhost:8080/tasks/`
+
+`http GET localhost:8080/tasks/`
+
+### Delete a task
+
+`curl -X DELETE localhost:8080/tasks/1`
+
+`http DELETE localhost:8080/tasks/1`
+
+### Delete all tasks
+
+`curl -X DELETE localhost:8080/tasks/`
+
+`http DELETE localhost:8080/tasks/`
 
 ### Run tests
 
