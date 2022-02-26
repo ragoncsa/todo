@@ -5,33 +5,33 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 // TaskServiceHTTPHandlers defines all the handlers the TaskService needs. It's
 // possible to register routes for a different implementation (like a mock).
 type TaskServiceHTTPHandlers interface {
-	GetTask(w http.ResponseWriter, r *http.Request)
-	GetTasks(w http.ResponseWriter, r *http.Request)
-	CreateTask(w http.ResponseWriter, r *http.Request)
-	DeleteTask(w http.ResponseWriter, r *http.Request)
-	DeleteTasks(w http.ResponseWriter, r *http.Request)
+	GetTask(c *gin.Context)
+	GetTasks(c *gin.Context)
+	CreateTask(c *gin.Context)
+	DeleteTask(c *gin.Context)
+	DeleteTasks(c *gin.Context)
 }
 
 type Server struct {
-	router *mux.Router
+	router *gin.Engine
 }
 
 func InitServer() *Server {
-	return &Server{router: mux.NewRouter()}
+	return &Server{router: gin.Default()}
 }
 
 func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {
-	s.router.HandleFunc("/tasks/", t.GetTasks).Methods("GET")
-	s.router.HandleFunc("/tasks/{taskid}", t.GetTask).Methods("GET")
-	s.router.HandleFunc("/tasks/", t.CreateTask).Methods("POST")
-	s.router.HandleFunc("/tasks/{taskid}", t.DeleteTask).Methods("DELETE")
-	s.router.HandleFunc("/tasks/", t.DeleteTasks).Methods("DELETE")
+	s.router.GET("/tasks/", t.GetTasks)
+	s.router.GET("/tasks/:taskid", t.GetTask)
+	s.router.POST("/tasks/", t.CreateTask)
+	s.router.DELETE("/tasks/:taskid", t.DeleteTask)
+	s.router.DELETE("/tasks/", t.DeleteTasks)
 }
 
 func (s Server) Start() {

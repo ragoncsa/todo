@@ -1,84 +1,54 @@
 package http
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/ragoncsa/todo/domain"
 )
 
-type JsonResponse struct {
-	Type    string         `json:"type"`
-	Data    []*domain.Task `json:"data"`
-	Message string         `json:"message"`
-}
-
 type CreateTaskRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 }
 
 type TaskService struct {
 	Service domain.TaskService
 }
 
-func (t *TaskService) GetTasks(w http.ResponseWriter, r *http.Request) {
+func (t *TaskService) GetTasks(c *gin.Context) {
 }
 
-func (t *TaskService) GetTask(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["taskid"]
+func (t *TaskService) GetTask(c *gin.Context) {
+	id := c.Param("taskid")
 
-	var response = JsonResponse{}
-	defer func() { json.NewEncoder(w).Encode(response) }()
-
-	if id == "" {
-		response = JsonResponse{Type: "error", Message: "taskid missing"}
-		return
-	}
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		response = JsonResponse{Type: "error", Message: "taskid must be an integer"}
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "taskid must be an integer"})
 		return
 	}
 	task, err := t.Service.Task(idInt)
 	if err != nil {
-		response = JsonResponse{Type: "error", Message: err.Error()}
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
 		return
 	}
-
-	response = JsonResponse{
-		Type:    "success",
-		Message: "task retrieved successfully",
-		Data:    []*domain.Task{task},
-	}
+	c.IndentedJSON(http.StatusOK, task)
 }
 
-func (t *TaskService) CreateTask(w http.ResponseWriter, r *http.Request) {
-
-	var response *JsonResponse
-	defer func() { json.NewEncoder(w).Encode(&response) }()
-
-	// name := r.FormValue("taskname")
-	decoder := json.NewDecoder(r.Body)
+func (t *TaskService) CreateTask(c *gin.Context) {
 	var request CreateTaskRequest
-	err := decoder.Decode(&request)
-	if err != nil {
-		response = &JsonResponse{Type: "error", Message: "invalid JSON in request"}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if request.Name == "" {
-		response = &JsonResponse{Type: "error", Message: "taskname missing"}
-		return
-	}
-	t.Service.CreateTask(&domain.Task{Name: request.Name})
-
-	response = &JsonResponse{Type: "success", Message: "task created successfully"}
+	task := &domain.Task{Name: request.Name}
+	t.Service.CreateTask(task)
+	c.IndentedJSON(http.StatusCreated, task)
 }
 
-func (t *TaskService) DeleteTask(w http.ResponseWriter, r *http.Request) {
+func (t *TaskService) DeleteTask(c *gin.Context) {
 }
 
-func (t *TaskService) DeleteTasks(w http.ResponseWriter, r *http.Request) {
+func (t *TaskService) DeleteTasks(c *gin.Context) {
 }
