@@ -15,6 +15,10 @@ type JsonResponse struct {
 	Message string         `json:"message"`
 }
 
+type CreateTaskRequest struct {
+	Name string `json:"name"`
+}
+
 type TaskService struct {
 	Service domain.TaskService
 }
@@ -53,16 +57,22 @@ func (t *TaskService) GetTask(w http.ResponseWriter, r *http.Request) {
 
 func (t *TaskService) CreateTask(w http.ResponseWriter, r *http.Request) {
 
-	name := r.FormValue("taskname")
-
 	var response *JsonResponse
 	defer func() { json.NewEncoder(w).Encode(&response) }()
 
-	if name == "" {
+	// name := r.FormValue("taskname")
+	decoder := json.NewDecoder(r.Body)
+	var request CreateTaskRequest
+	err := decoder.Decode(&request)
+	if err != nil {
+		response = &JsonResponse{Type: "error", Message: "invalid JSON in request"}
+		return
+	}
+	if request.Name == "" {
 		response = &JsonResponse{Type: "error", Message: "taskname missing"}
 		return
 	}
-	t.Service.CreateTask(&domain.Task{Name: name})
+	t.Service.CreateTask(&domain.Task{Name: request.Name})
 
 	response = &JsonResponse{Type: "success", Message: "task created successfully"}
 }

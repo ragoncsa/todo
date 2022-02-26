@@ -21,13 +21,13 @@ go run main.go
 
 ### curl
 
-`curl -X POST localhost:8080/tasks/ --data "taskname=hello1"`
+`curl -X POST -H 'Content-Type: application/json' localhost:8080/tasks/ -d '{"name": "hello1"}'`
 
 `curl -X GET localhost:8080/tasks/20`
 
 ### httpie
 
-`http POST --form localhost:8080/tasks/ taskname=hello1`
+`http POST localhost:8080/tasks/ taskname=hello1`
 
 `http GET localhost:8080/tasks/1`
 
