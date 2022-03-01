@@ -14,6 +14,9 @@ type TaskService struct {
 
 	DeleteTaskFn      func(id int) error
 	DeleteTaskInvoked bool
+
+	DeleteTasksFn      func() error
+	DeleteTasksInvoked bool
 }
 
 func (s *TaskService) Task(id int) (*domain.Task, error) {
@@ -34,4 +37,9 @@ func (s *TaskService) CreateTask(t *domain.Task) error {
 func (s *TaskService) DeleteTask(id int) error {
 	s.DeleteTaskInvoked = true
 	return s.DeleteTaskFn(id)
+}
+
+func (s *TaskService) DeleteTasks() error {
+	s.DeleteTasksInvoked = true
+	return s.DeleteTasksFn()
 }
