@@ -1,0 +1,17 @@
+info:
+  contact: {}
+paths:
+  /tasks/:
+    get:
+      consumes:
+      - application/json
+      description: Reads and returns all the tasks.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Get all tasks
+      tags:
+      - read
+swagger: "2.0"

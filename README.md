@@ -1,5 +1,16 @@
 # todo
 
+## Overview
+
+This is a sample application for REST service development with golang. Libraries used:
+
+* [gorm](https://gorm.io/) as ORM library
+* [viper](https://github.com/spf13/viper) for configuration management
+* [gin](https://github.com/gin-gonic/gin) as web framework
+* [gin-swagger](https://github.com/swaggo/gin-swagger) to generate OpenAPI spec from go comments
+
+Simple REST webservice 
+
 ## Set up database
 
 Also see: <https://hub.docker.com/_/postgres>
@@ -52,3 +63,11 @@ go run main.go
 ### Run tests
 
 go test ./...
+
+## Generate OpenAPI spec
+
+`swag init`
+
+To access swagger UI go to <http://localhost:8080/swagger/index.html>
+
+For more see: <https://github.com/swaggo/gin-swagger>

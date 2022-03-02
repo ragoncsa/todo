@@ -17,6 +17,17 @@ type TaskService struct {
 	Service domain.TaskService
 }
 
+// @BasePath /
+
+// GetTasks godoc
+// @Summary Get all tasks
+// @Schemes
+// @Description Reads and returns all the tasks.
+// @Tags read
+// @Accept json
+// @Produce json
+// @Success 200
+// @Router /tasks/ [get]
 func (t *TaskService) GetTasks(c *gin.Context) {
 	tasks, err := t.Service.Tasks()
 	if err != nil {

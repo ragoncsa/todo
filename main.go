@@ -8,6 +8,8 @@ import (
 	"github.com/ragoncsa/todo/http"
 
 	"github.com/spf13/viper"
+
+	docs "github.com/ragoncsa/todo/docs"
 )
 
 func loadConfig() *config.Config {
@@ -34,6 +36,8 @@ func main() {
 		panic("failed to connect database")
 	}
 	gorm.RunMigration(db)
+
+	docs.SwaggerInfo.BasePath = "/"
 
 	server := http.InitServer()
 	tsDB := &gorm.TaskService{DB: db}

@@ -6,6 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // TaskServiceHTTPHandlers defines all the handlers the TaskService needs. It's
@@ -32,6 +35,12 @@ func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {
 	s.router.POST("/tasks/", t.CreateTask)
 	s.router.DELETE("/tasks/:taskid", t.DeleteTask)
 	s.router.DELETE("/tasks/", t.DeleteTasks)
+
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	ginSwagger.WrapHandler(swaggerfiles.Handler,
+		ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
+		ginSwagger.DefaultModelsExpandDepth(-1))
+
 }
 
 func (s Server) Start() {
