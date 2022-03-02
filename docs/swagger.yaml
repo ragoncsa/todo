@@ -1,7 +1,39 @@
+definitions:
+  domain.Task:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      dueAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      priority:
+        type: integer
+      updatedAt:
+        type: string
+      userId:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
   /tasks/:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes all the tasks.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Delete all tasks
+      tags:
+      - write
     get:
       consumes:
       - application/json
@@ -12,6 +44,62 @@ paths:
         "200":
           description: ""
       summary: Get all tasks
+      tags:
+      - read
+    post:
+      consumes:
+      - application/json
+      description: Creates a new task.
+      parameters:
+      - description: New task
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Creates task
+      tags:
+      - write
+  /tasks/{taskid}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a single task.
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Deletes task
+      tags:
+      - write
+    get:
+      consumes:
+      - application/json
+      description: Reads a single task and returns it.
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Get task
       tags:
       - read
 swagger: "2.0"
