@@ -10,7 +10,7 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Name string `json:"name" binding:"required"`
+	Task *domain.Task `json:"task" binding:"required"`
 }
 
 type TaskService struct {
@@ -37,7 +37,7 @@ func (t *TaskService) GetTasks(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, tasks)
 }
 
-// GetTasks godoc
+// GetTask godoc
 // @Summary       Get task
 // @Schemes
 // @Description   Reads a single task and returns it.
@@ -70,7 +70,7 @@ func (t *TaskService) GetTask(c *gin.Context) {
 // @Tags          write
 // @Accept        json
 // @Produce       json
-// @Param         task  body      domain.Task  true  "New task"
+// @Param         task  body      CreateTaskRequest  true  "New task"
 // @Success       200
 // @Router        /tasks/ [post]
 func (t *TaskService) CreateTask(c *gin.Context) {
@@ -79,9 +79,8 @@ func (t *TaskService) CreateTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	task := &domain.Task{Name: request.Name}
-	t.Service.CreateTask(task)
-	c.IndentedJSON(http.StatusCreated, task)
+	t.Service.CreateTask(request.Task)
+	c.IndentedJSON(http.StatusCreated, request.Task)
 }
 
 // DeleteTasks godoc
@@ -110,7 +109,7 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, struct{}{})
 }
 
-// GetTasks godoc
+// DeleteTask godoc
 // @Summary       Delete all tasks
 // @Schemes
 // @Description   Deletes all the tasks.

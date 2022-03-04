@@ -18,6 +18,13 @@ definitions:
       userId:
         type: string
     type: object
+  http.CreateTaskRequest:
+    properties:
+      task:
+        $ref: '#/definitions/domain.Task'
+    required:
+    - task
+    type: object
 info:
   contact: {}
 paths:
@@ -56,7 +63,7 @@ paths:
         name: task
         required: true
         schema:
-          $ref: '#/definitions/domain.Task'
+          $ref: '#/definitions/http.CreateTaskRequest'
       produces:
       - application/json
       responses:

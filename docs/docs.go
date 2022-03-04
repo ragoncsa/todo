@@ -54,7 +54,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Task"
+                            "$ref": "#/definitions/http.CreateTaskRequest"
                         }
                     }
                 ],
@@ -167,6 +167,17 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "string"
+                }
+            }
+        },
+        "http.CreateTaskRequest": {
+            "type": "object",
+            "required": [
+                "task"
+            ],
+            "properties": {
+                "task": {
+                    "$ref": "#/definitions/domain.Task"
                 }
             }
         }
