@@ -71,3 +71,19 @@ go test ./...
 To access swagger UI go to <http://localhost:8080/swagger/index.html>
 
 For more see: <https://github.com/swaggo/gin-swagger>
+
+## Containerization
+
+To build
+
+`docker build -t todo .`
+
+Docker-compose starts the built container with a database
+
+`docker-compose up`
+
+The you can access swagger UI <http://localhost:8080/swagger/index.html>
+
+### Reset the database
+
+`docker-compose down --volumes`

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ragoncsa/todo/config"
 	"github.com/ragoncsa/todo/gorm"
@@ -11,6 +12,14 @@ import (
 
 	docs "github.com/ragoncsa/todo/docs"
 )
+
+// Added workaround due to issues with environment variables in Viper
+// https://github.com/spf13/viper/issues/761
+func overrideUsingEnvVars(config *config.Config) {
+	if host, present := os.LookupEnv("DB_HOST"); present {
+		config.Database.Host = host
+	}
+}
 
 func loadConfig() *config.Config {
 	viper.SetConfigName("local-env")
@@ -26,6 +35,7 @@ func loadConfig() *config.Config {
 	if err != nil {
 		panic(fmt.Errorf("unable to decode into struct: %w", err))
 	}
+	overrideUsingEnvVars(&conf)
 	return &conf
 }
 
