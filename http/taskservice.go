@@ -9,25 +9,20 @@ import (
 	"github.com/ragoncsa/todo/domain"
 )
 
-type CreateTaskRequest struct {
-	Task *domain.Task `json:"task" binding:"required"`
-}
-
 type TaskService struct {
 	Service domain.TaskService
 }
 
-// @BasePath /
-
 // GetTasks godoc
-// @Summary       Get all tasks
+// @Summary  Get all tasks
 // @Schemes
-// @Description   Reads and returns all the tasks.
-// @Tags          read
-// @Accept        json
-// @Produce       json
-// @Success       200
-// @Router        /tasks/ [get]
+// @Description  Reads and returns all the tasks.
+// @Tags         read
+// @Accept       json
+// @Produce      json
+// @Success      200      {array}   domain.Task
+// @Failure      default  {string}  string  "unexpected error"
+// @Router       /tasks/ [get]
 func (t *TaskService) GetTasks(c *gin.Context) {
 	tasks, err := t.Service.Tasks()
 	if err != nil {
@@ -38,15 +33,17 @@ func (t *TaskService) GetTasks(c *gin.Context) {
 }
 
 // GetTask godoc
-// @Summary       Get task
+// @Summary  Get task
 // @Schemes
-// @Description   Reads a single task and returns it.
-// @Tags          read
-// @Accept        json
-// @Produce       json
-// @Param         taskid  path  int  true  "Task ID"
-// @Success       200
-// @Router        /tasks/{taskid} [get]
+// @Description  Reads a single task and returns it.
+// @Tags         read
+// @Accept       json
+// @Produce      json
+// @Param        taskid   path      int  true  "Task ID"
+// @Success      200      {object}  domain.Task
+// @Failure      401      {string}  string  "not found"
+// @Failure      default  {string}  string  "unexpected error"
+// @Router       /tasks/{taskid} [get]
 func (t *TaskService) GetTask(c *gin.Context) {
 	id := c.Param("taskid")
 
@@ -64,35 +61,35 @@ func (t *TaskService) GetTask(c *gin.Context) {
 }
 
 // CreateTask godoc
-// @Summary       Creates task
+// @Summary  Creates task
 // @Schemes
-// @Description   Creates a new task.
-// @Tags          write
-// @Accept        json
-// @Produce       json
-// @Param         task  body      CreateTaskRequest  true  "New task"
-// @Success       200
-// @Router        /tasks/ [post]
+// @Description  Creates a new task.
+// @Tags         write
+// @Accept       json
+// @Produce      json
+// @Param        task  body  CreateTaskRequest  true  "New task"
+// @Success      200
+// @Router       /tasks/ [post]
 func (t *TaskService) CreateTask(c *gin.Context) {
 	var request CreateTaskRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	t.Service.CreateTask(request.Task)
+	t.Service.CreateTask(request.Task.httpToModel())
 	c.IndentedJSON(http.StatusCreated, request.Task)
 }
 
 // DeleteTasks godoc
-// @Summary       Deletes task
+// @Summary  Deletes task
 // @Schemes
-// @Description   Deletes a single task.
-// @Tags          write
-// @Accept        json
-// @Produce       json
-// @Param         taskid  path  int  true  "Task ID"
-// @Success       200
-// @Router        /tasks/{taskid} [delete]
+// @Description  Deletes a single task.
+// @Tags         write
+// @Accept       json
+// @Produce      json
+// @Param        taskid  path  int  true  "Task ID"
+// @Success      200
+// @Router       /tasks/{taskid} [delete]
 func (t *TaskService) DeleteTask(c *gin.Context) {
 	id := c.Param("taskid")
 
@@ -110,14 +107,14 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 }
 
 // DeleteTask godoc
-// @Summary       Delete all tasks
+// @Summary  Delete all tasks
 // @Schemes
-// @Description   Deletes all the tasks.
-// @Tags          write
-// @Accept        json
-// @Produce       json
-// @Success       200
-// @Router        /tasks/ [delete]
+// @Description  Deletes all the tasks.
+// @Tags         write
+// @Accept       json
+// @Produce      json
+// @Success      200
+// @Router       /tasks/ [delete]
 func (t *TaskService) DeleteTasks(c *gin.Context) {
 	err := t.Service.DeleteTasks()
 	if err != nil {

@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   domain.Task:
     properties:
@@ -21,12 +22,38 @@ definitions:
   http.CreateTaskRequest:
     properties:
       task:
-        $ref: '#/definitions/domain.Task'
+        $ref: '#/definitions/http.Task'
     required:
     - task
     type: object
+  http.Task:
+    properties:
+      description:
+        example: description of my-task-1
+        type: string
+      dueAt:
+        example: "2019-10-12T07:20:50.52Z"
+        type: string
+      name:
+        example: my-task-1
+        type: string
+      priority:
+        example: 1
+        format: int64
+        type: integer
+      userId:
+        example: johndoe
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact: {}
+  description: This is a sample server that manages tasks.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Tasks service
+  version: "1.0"
 paths:
   /tasks/:
     delete:
@@ -49,7 +76,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        default:
+          description: unexpected error
+          schema:
+            type: string
       summary: Get all tasks
       tags:
       - read
@@ -105,7 +140,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "401":
+          description: not found
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            type: string
       summary: Get task
       tags:
       - read

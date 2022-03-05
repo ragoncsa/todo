@@ -11,6 +11,10 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -31,7 +35,19 @@ const docTemplate = `{
                 "summary": "Get all tasks",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Task"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -107,7 +123,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Task"
+                        }
+                    },
+                    "401": {
+                        "description": "not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -177,7 +208,33 @@ const docTemplate = `{
             ],
             "properties": {
                 "task": {
-                    "$ref": "#/definitions/domain.Task"
+                    "$ref": "#/definitions/http.Task"
+                }
+            }
+        },
+        "http.Task": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "description of my-task-1"
+                },
+                "dueAt": {
+                    "type": "string",
+                    "example": "2019-10-12T07:20:50.52Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "my-task-1"
+                },
+                "priority": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "johndoe"
                 }
             }
         }
@@ -186,12 +243,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Tasks service",
+	Description:      "This is a sample server that manages tasks.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

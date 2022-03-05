@@ -74,7 +74,7 @@ func TestCreateTask(t *testing.T) {
 
 	// Invoke the handler.
 	w := httptest.NewRecorder()
-	request, err := json.Marshal(&CreateTaskRequest{Name: "my-task-1"})
+	request, err := json.Marshal(&CreateTaskRequest{&Task{Name: "my-task-1"}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 		return
