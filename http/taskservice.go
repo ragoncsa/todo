@@ -76,7 +76,10 @@ func (t *TaskService) CreateTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	t.Service.CreateTask(request.Task.httpToModel())
+	if err := t.Service.CreateTask(request.Task.httpToModel()); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		return
+	}
 	c.IndentedJSON(http.StatusCreated, request.Task)
 }
 

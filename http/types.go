@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -13,17 +14,14 @@ type TimestampTime struct {
 	time.Time
 }
 
-///implement encoding.JSON.Marshaler interface
 func (t *TimestampTime) MarshalJSON() ([]byte, error) {
 	bin := make([]byte, 0, len("2019-10-12T07:20:50.52Z"))
-	s := "\"" + t.Format(time.RFC3339) + "\""
-	bin = append(bin, s...)
+	bin = append(bin, fmt.Sprintf("\"%s\"", t.Format(time.RFC3339))...)
 	return bin, nil
 }
 
 func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
-	s := strings.Trim(string(bin), string([]byte{0}))
-	s = strings.Trim(s, "\"")
+	s := strings.Trim(string(bin), string([]byte{0, '"'}))
 	parsedTime, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		return err
