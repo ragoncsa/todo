@@ -5,7 +5,7 @@ import (
 )
 
 type Task struct {
-	ID          int `gorm:"primarykey"`
+	ID          int
 	UserId      string
 	Name        string
 	Description string
