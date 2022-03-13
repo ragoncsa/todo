@@ -72,6 +72,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/http.CreateTaskRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
                     }
                 ],
                 "responses": {

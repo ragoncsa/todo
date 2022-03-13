@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ragoncsa/todo/authz"
 	"github.com/ragoncsa/todo/domain"
 )
 
 type TaskService struct {
-	Service domain.TaskService
+	Service     domain.TaskService
+	AuthzClient authz.Client
 }
 
 // GetTasks godoc
@@ -70,17 +73,31 @@ func (t *TaskService) GetTask(c *gin.Context) {
 // @Param        task  body  CreateTaskRequest  true  "New task"
 // @Success      200
 // @Router       /tasks/ [post]
+// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
 func (t *TaskService) CreateTask(c *gin.Context) {
 	var request CreateTaskRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := t.Service.CreateTask(request.Task.httpToModel()); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
-		return
+	user := c.Request.Header.Get("CallerId")
+	path := strings.Split(strings.Trim(c.Request.URL.Path, "/"), "/")
+	dreq := &authz.DecisionRequest{
+		Method: c.Request.Method,
+		Path:   path,
+		Owner:  request.Task.UserId,
+		User:   user,
 	}
-	c.IndentedJSON(http.StatusCreated, request.Task)
+	allowed, err := t.AuthzClient.IsAllowed(dreq)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+	} else if !allowed {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"message": "forbidden"})
+	} else if err := t.Service.CreateTask(request.Task.httpToModel()); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+	} else {
+		c.IndentedJSON(http.StatusCreated, request.Task)
+	}
 }
 
 // DeleteTasks godoc

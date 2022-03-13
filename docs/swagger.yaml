@@ -99,6 +99,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/http.CreateTaskRequest'
+      - description: the id of the caller
+        in: header
+        name: CallerId
+        type: string
       produces:
       - application/json
       responses:

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ragoncsa/todo/authz"
 	"github.com/ragoncsa/todo/config"
 	"github.com/ragoncsa/todo/gorm"
 	"github.com/ragoncsa/todo/http"
@@ -59,10 +60,11 @@ func main() {
 
 	docs.SwaggerInfo.BasePath = "/"
 
-	server := http.InitServer()
+	server := http.InitServer(conf)
 	tsDB := &gorm.TaskService{DB: db}
 	tsHTTP := http.TaskService{
-		Service: tsDB,
+		Service:     tsDB,
+		AuthzClient: authz.New(conf),
 	}
 	server.RegisterRoutes(&tsHTTP)
 	server.Start()
