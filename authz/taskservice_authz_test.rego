@@ -83,3 +83,32 @@ test_get_list_another_user_denied {
         "owner": "johndoe"
     }
 }
+
+test_delete_with_id_allowed {
+    allow with input as {
+        "path": ["tasks", "42"],
+        "taskid": "42",
+        "method": "DELETE",
+        "user": "johndoe",
+        "owner": "johndoe"
+    }
+}
+
+test_delete_anonymous_denied {
+    not allow with input as {
+        "path": ["tasks", "42"],
+        "taskid": "42",
+        "method": "DELETE",
+        "owner": "johndoe"
+    }
+}
+
+test_delete_another_user_denied {
+    not allow with input as {
+        "path": ["tasks", "42"],
+        "taskid": "42", 
+        "method": "DELETE",
+        "user": "johnsmith",
+        "owner": "johndoe"
+    }
+}

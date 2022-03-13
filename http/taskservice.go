@@ -67,7 +67,6 @@ func (t *TaskService) GetTasks(c *gin.Context) {
 // @Param        CallerId  header  string  false "the id of the caller" "johndoe"
 func (t *TaskService) GetTask(c *gin.Context) {
 	id := c.Param("taskid")
-
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "taskid must be an integer"})
@@ -78,7 +77,17 @@ func (t *TaskService) GetTask(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, task)
+	dreq := prepDecisionReq(c.Request)
+	dreq.Owner = task.UserId
+	dreq.TaskID = strconv.Itoa(task.ID)
+	allowed, err := t.AuthzClient.IsAllowed(dreq)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+	} else if !allowed {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"message": "forbidden"})
+	} else {
+		c.IndentedJSON(http.StatusOK, task)
+	}
 }
 
 // CreateTask godoc
@@ -131,12 +140,25 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "taskid must be an integer"})
 		return
 	}
-	err = t.Service.DeleteTask(idInt)
+
+	task, err := t.Service.Task(idInt)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, struct{}{})
+	dreq := prepDecisionReq(c.Request)
+	dreq.Owner = task.UserId
+	dreq.TaskID = strconv.Itoa(task.ID)
+	allowed, err := t.AuthzClient.IsAllowed(dreq)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+	} else if !allowed {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"message": "forbidden"})
+	} else if err = t.Service.DeleteTask(idInt); err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
+	} else {
+		c.IndentedJSON(http.StatusOK, struct{}{})
+	}
 }
 
 // DeleteTask godoc

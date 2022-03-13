@@ -133,7 +133,8 @@ func TestCreateTaskForbidden(t *testing.T) {
 
 func TestDeleteTask(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock DeleteTask() call.
 	ts.DeleteTaskFn = func(id int) error {
@@ -141,6 +142,13 @@ func TestDeleteTask(t *testing.T) {
 			t.Fatalf("unexpected id: %d", id)
 		}
 		return nil
+	}
+	// Mock Task() call.
+	ts.TaskFn = func(id int) (*domain.Task, error) {
+		if id != 100 {
+			t.Fatalf("unexpected id: %d", id)
+		}
+		return &domain.Task{ID: 100, Name: "my-task-1"}, nil
 	}
 
 	// Invoke the handler.
@@ -159,7 +167,8 @@ func TestDeleteTask(t *testing.T) {
 
 func TestDeleteTasks(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock Tasks() call.
 	ts.DeleteTasksFn = func() error {

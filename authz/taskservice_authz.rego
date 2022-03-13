@@ -26,3 +26,13 @@ allow {
     input.taskid = taskid
     input.user == input.owner
 }
+
+# Only owner can read a task
+# Ownership information is provided as part of OPA's input
+allow {
+    input.method == "DELETE"
+    some taskid
+    input.path = ["tasks", taskid]
+    input.taskid = taskid
+    input.user == input.owner
+}
