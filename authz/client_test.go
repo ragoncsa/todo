@@ -12,8 +12,8 @@ import (
 func TestIsAllowed(t *testing.T) {
 	const url = "http://myurl"
 	client := &client{
-		restClient:    resty.New(),
-		authzEndpoint: url,
+		restClient: resty.New(),
+		endpoint:   url,
 	}
 	httpmock.ActivateNonDefault(client.restClient.GetClient())
 	defer httpmock.DeactivateAndReset()
@@ -31,9 +31,9 @@ func TestIsAllowed(t *testing.T) {
 				Path:   []string{"tasks"},
 				User:   "johndoe",
 			}) {
-				resp, err = httpmock.NewJsonResponse(200, &authzDecision{
+				resp, err = httpmock.NewJsonResponse(200, &decision{
 					DecisionId: "798d0f89-3ba0-4662-87b1-c2a8adb8f62a",
-					Result: &authzDecisionResult{
+					Result: &decisionResult{
 						Allow: true,
 					},
 				})

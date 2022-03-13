@@ -7,13 +7,13 @@ import (
 	"github.com/ragoncsa/todo/config"
 )
 
-type authzDecisionResult struct {
+type decisionResult struct {
 	Allow bool `json:"allow"`
 }
 
-type authzDecision struct {
-	Result     *authzDecisionResult `json:"result"`
-	DecisionId string               `json:"decision_id"`
+type decision struct {
+	Result     *decisionResult `json:"result"`
+	DecisionId string          `json:"decision_id"`
 }
 
 type DecisionRequest struct {
@@ -21,6 +21,7 @@ type DecisionRequest struct {
 	Path   []string `json:"path"`
 	Owner  string   `json:"owner"`
 	User   string   `json:"user"`
+	TaskID string   `json:"taskid"`
 }
 
 type decisionReqInternal struct {
@@ -32,14 +33,14 @@ type Client interface {
 }
 
 type client struct {
-	restClient    *resty.Client
-	authzEndpoint string
+	restClient *resty.Client
+	endpoint   string
 }
 
 func New(conf *config.Config) Client {
 	return &client{
-		restClient:    resty.New(),
-		authzEndpoint: conf.Authz.Endpoint,
+		restClient: resty.New(),
+		endpoint:   conf.Authz.Endpoint,
 	}
 }
 
@@ -51,12 +52,10 @@ func (c *client) IsAllowed(dreq *DecisionRequest) (bool, error) {
 	resp, err := c.restClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(dreqStr).
-		SetResult(&authzDecision{}).
-		Post(c.authzEndpoint)
-	// rstr := string(resp.Body())
-	// _ = rstr
+		SetResult(&decision{}).
+		Post(c.endpoint)
 	if err != nil || resp.IsError() {
 		return false, err
 	}
-	return resp.Result().(*authzDecision).Result.Allow, nil
+	return resp.Result().(*decision).Result.Allow, nil
 }

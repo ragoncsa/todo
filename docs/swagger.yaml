@@ -60,6 +60,11 @@ paths:
       consumes:
       - application/json
       description: Deletes all the tasks.
+      parameters:
+      - description: the id of the caller
+        in: header
+        name: CallerId
+        type: string
       produces:
       - application/json
       responses:
@@ -72,6 +77,11 @@ paths:
       consumes:
       - application/json
       description: Reads and returns all the tasks.
+      parameters:
+      - description: the id of the caller
+        in: header
+        name: CallerId
+        type: string
       produces:
       - application/json
       responses:
@@ -122,6 +132,10 @@ paths:
         name: taskid
         required: true
         type: integer
+      - description: the id of the caller
+        in: header
+        name: CallerId
+        type: string
       produces:
       - application/json
       responses:
@@ -140,6 +154,10 @@ paths:
         name: taskid
         required: true
         type: integer
+      - description: the id of the caller
+        in: header
+        name: CallerId
+        type: string
       produces:
       - application/json
       responses:
