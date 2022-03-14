@@ -36,3 +36,14 @@ allow {
     input.taskid = taskid
     input.user == input.owner
 }
+
+# admin can perform any operation
+allow {
+    some taskid
+    input.path = ["tasks", taskid]
+    input.user == "admin"
+}
+allow {
+    input.path = ["tasks"]
+    input.user == "admin"
+}

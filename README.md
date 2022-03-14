@@ -36,7 +36,7 @@ Go to Swagger UI <http://localhost:8080/swagger/index.html>
 
 ```shell
 docker-compose up db
-opa build authz -o authz/bundle.tar.gz
+opa build authz -o authz/bundle.tar.gz --ignore 'taskservice_authz_test.rego'
 docker-compose up bundle_server
 docker-compose up opa
 ```

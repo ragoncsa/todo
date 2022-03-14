@@ -172,12 +172,17 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 // @Router       /tasks/ [delete]
 // @Param        CallerId  header  string  false "the id of the caller" "johndoe"
 func (t *TaskService) DeleteTasks(c *gin.Context) {
-	err := t.Service.DeleteTasks()
+	dreq := prepDecisionReq(c.Request)
+	allowed, err := t.AuthzClient.IsAllowed(dreq)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
-		return
+	} else if !allowed {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"message": "forbidden"})
+	} else if err := t.Service.DeleteTasks(); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+	} else {
+		c.IndentedJSON(http.StatusOK, struct{}{})
 	}
-	c.IndentedJSON(http.StatusOK, struct{}{})
 }
 
 func prepDecisionReq(req *http.Request) *authz.DecisionRequest {
