@@ -3,6 +3,7 @@ package config
 type Config struct {
 	Server   ServerConf
 	Database DatabaseConf
+	Authz    AuthzConf
 }
 
 type ServerConf struct {
@@ -16,4 +17,8 @@ type DatabaseConf struct {
 	DBUser     string
 	DBPassword string
 	Timezone   string
+}
+
+type AuthzConf struct {
+	Endpoint string
 }

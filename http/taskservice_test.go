@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ragoncsa/todo/config"
 	"github.com/ragoncsa/todo/domain"
 	"github.com/ragoncsa/todo/mock"
 )
@@ -27,7 +28,7 @@ func TestGetTask(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/tasks/100", nil)
 
-	server := InitServer()
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -50,7 +51,7 @@ func TestGetTasks(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/tasks/", nil)
 
-	server := InitServer()
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -62,7 +63,8 @@ func TestGetTasks(t *testing.T) {
 
 func TestCreateTask(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock our CreateTask() call.
 	ts.CreateTaskFn = func(task *domain.Task) error {
@@ -82,7 +84,7 @@ func TestCreateTask(t *testing.T) {
 	reader := strings.NewReader(string(request))
 	r, _ := http.NewRequest("POST", "/tasks/", reader)
 
-	server := InitServer()
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -92,9 +94,47 @@ func TestCreateTask(t *testing.T) {
 	}
 }
 
+func TestCreateTaskForbidden(t *testing.T) {
+	var ts mock.TaskService
+	var ac mock.AlwaysDeny
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
+
+	// Mock our CreateTask() call.
+	ts.CreateTaskFn = func(task *domain.Task) error {
+		if task.Name != "my-task-1" {
+			t.Fatalf("unexpected name: %s", task.Name)
+		}
+		return nil
+	}
+
+	// Invoke the handler.
+	w := httptest.NewRecorder()
+	request, err := json.Marshal(&CreateTaskRequest{&Task{Name: "my-task-1"}})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+		return
+	}
+	reader := strings.NewReader(string(request))
+	r, _ := http.NewRequest("POST", "/tasks/", reader)
+
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server.RegisterRoutes(tsHTTP)
+	server.router.ServeHTTP(w, r)
+
+	if got, want := w.Code, 403; got != want {
+		t.Fatalf("response code - got: %d, want: %d", got, want)
+	}
+
+	// Validate mock.
+	if ts.CreateTaskInvoked {
+		t.Fatal("not expected CreateTask() to be invoked")
+	}
+}
+
 func TestDeleteTask(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock DeleteTask() call.
 	ts.DeleteTaskFn = func(id int) error {
@@ -103,12 +143,19 @@ func TestDeleteTask(t *testing.T) {
 		}
 		return nil
 	}
+	// Mock Task() call.
+	ts.TaskFn = func(id int) (*domain.Task, error) {
+		if id != 100 {
+			t.Fatalf("unexpected id: %d", id)
+		}
+		return &domain.Task{ID: 100, Name: "my-task-1"}, nil
+	}
 
 	// Invoke the handler.
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("DELETE", "/tasks/100", nil)
 
-	server := InitServer()
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -120,7 +167,8 @@ func TestDeleteTask(t *testing.T) {
 
 func TestDeleteTasks(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock Tasks() call.
 	ts.DeleteTasksFn = func() error {
@@ -131,7 +179,7 @@ func TestDeleteTasks(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("DELETE", "/tasks/", nil)
 
-	server := InitServer()
+	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 

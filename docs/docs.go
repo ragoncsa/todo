@@ -33,6 +33,14 @@ const docTemplate = `{
                     "read"
                 ],
                 "summary": "Get all tasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -72,6 +80,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/http.CreateTaskRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -92,6 +106,14 @@ const docTemplate = `{
                     "write"
                 ],
                 "summary": "Delete all tasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": ""
@@ -119,6 +141,12 @@ const docTemplate = `{
                         "name": "taskid",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -161,6 +189,12 @@ const docTemplate = `{
                         "name": "taskid",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the id of the caller",
+                        "name": "CallerId",
+                        "in": "header"
                     }
                 ],
                 "responses": {

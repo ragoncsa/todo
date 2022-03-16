@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ragoncsa/todo/config"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -23,10 +24,14 @@ type TaskServiceHTTPHandlers interface {
 
 type Server struct {
 	router *gin.Engine
+	port   int
 }
 
-func InitServer() *Server {
-	return &Server{router: gin.Default()}
+func InitServer(conf *config.Config) *Server {
+	return &Server{
+		router: gin.Default(),
+		port:   conf.Server.Port,
+	}
 }
 
 func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {
@@ -44,6 +49,6 @@ func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {
 }
 
 func (s Server) Start() {
-	fmt.Println("Server at 8080")
-	log.Fatal(http.ListenAndServe(":8080", s.router))
+	fmt.Printf("Server at %d\n", s.port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.router))
 }
