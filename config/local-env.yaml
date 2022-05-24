@@ -4,10 +4,13 @@ server:
 database:
   host: localhost
   port: 5432
-  dbname:  postgres
+  dbname: postgres
   dbuser: postgres
   dbpassword: password
   timezone: "Europe/Helsinki"
 
 authz:
   endpoint: "http://127.0.0.1:8181/v1/data/authz"
+
+frontend:
+  endpoint: "http://localhost:3000"

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ragoncsa/todo/config"
 
@@ -28,10 +29,22 @@ type Server struct {
 }
 
 func InitServer(conf *config.Config) *Server {
-	return &Server{
+	server := &Server{
 		router: gin.Default(),
 		port:   conf.Server.Port,
 	}
+	server.router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{conf.Frontend.Endpoint},
+		AllowMethods: []string{"GET", "POST", "DELETE"},
+		AllowHeaders: []string{"Origin"},
+		// ExposeHeaders:    []string{"Content-Length"},
+		// AllowCredentials: true,
+		// AllowOriginFunc: func(origin string) bool {
+		// 	return origin == "https://github.com"
+		// },
+		// MaxAge: 12 * time.Hour,
+	}))
+	return server
 }
 
 func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {

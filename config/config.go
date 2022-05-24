@@ -4,6 +4,7 @@ type Config struct {
 	Server   ServerConf
 	Database DatabaseConf
 	Authz    AuthzConf
+	Frontend FrontendConf
 }
 
 type ServerConf struct {
@@ -20,5 +21,9 @@ type DatabaseConf struct {
 }
 
 type AuthzConf struct {
+	Endpoint string
+}
+
+type FrontendConf struct {
 	Endpoint string
 }
