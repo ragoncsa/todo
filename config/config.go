@@ -4,6 +4,7 @@ type Config struct {
 	Server   ServerConf
 	Database DatabaseConf
 	Authz    AuthzConf
+	Authn    AuthnConf
 	Frontend FrontendConf
 }
 
@@ -24,6 +25,11 @@ type AuthzConf struct {
 	Endpoint string
 }
 
+type AuthnConf struct {
+	ClientId string
+	DevMode  bool
+}
+
 type FrontendConf struct {
-	Endpoint string
+	Endpoints []string
 }

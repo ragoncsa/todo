@@ -15,6 +15,11 @@
     "paths": {
         "/tasks/": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Reads and returns all the tasks.",
                 "consumes": [
                     "application/json"
@@ -53,6 +58,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Creates a new task.",
                 "consumes": [
                     "application/json"
@@ -88,6 +98,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Deletes all the tasks.",
                 "consumes": [
                     "application/json"
@@ -116,6 +131,11 @@
         },
         "/tasks/{taskid}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Reads a single task and returns it.",
                 "consumes": [
                     "application/json"
@@ -164,6 +184,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Deletes a single task.",
                 "consumes": [
                     "application/json"
@@ -264,6 +289,13 @@
                     "example": "johndoe"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

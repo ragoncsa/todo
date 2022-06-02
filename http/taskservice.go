@@ -12,8 +12,9 @@ import (
 )
 
 type TaskService struct {
-	Service     domain.TaskService
-	AuthzClient authz.Client
+	Service      domain.TaskService
+	AuthzClient  authz.Client
+	AuthnDevMode bool
 }
 
 // GetTasks godoc
@@ -26,14 +27,15 @@ type TaskService struct {
 // @Success      200      {array}   domain.Task
 // @Failure      default  {string}  string  "unexpected error"
 // @Router       /tasks/ [get]
-// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
+// @Param        CallerId  header  string  false  "the id of the caller"  "johndoe"
+// @Security     JWT
 func (t *TaskService) GetTasks(c *gin.Context) {
 	tasks, err := t.Service.Tasks()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 		return
 	}
-	dreq := prepDecisionReq(c.Request)
+	dreq := t.prepDecisionReq(c, c.Request)
 	temp := tasks[:0]
 	// inefficient way of sending authorization requests sequentially - ok for demoing
 	for _, v := range tasks {
@@ -64,7 +66,8 @@ func (t *TaskService) GetTasks(c *gin.Context) {
 // @Failure      401      {string}  string  "not found"
 // @Failure      default  {string}  string  "unexpected error"
 // @Router       /tasks/{taskid} [get]
-// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
+// @Param        CallerId  header  string  false  "the id of the caller"  "johndoe"
+// @Security     JWT
 func (t *TaskService) GetTask(c *gin.Context) {
 	id := c.Param("taskid")
 	idInt, err := strconv.Atoi(id)
@@ -77,7 +80,7 @@ func (t *TaskService) GetTask(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
 		return
 	}
-	dreq := prepDecisionReq(c.Request)
+	dreq := t.prepDecisionReq(c, c.Request)
 	dreq.Owner = task.UserId
 	dreq.TaskID = strconv.Itoa(task.ID)
 	allowed, err := t.AuthzClient.IsAllowed(dreq)
@@ -100,14 +103,15 @@ func (t *TaskService) GetTask(c *gin.Context) {
 // @Param        task  body  CreateTaskRequest  true  "New task"
 // @Success      200
 // @Router       /tasks/ [post]
-// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
+// @Param        CallerId  header  string  false  "the id of the caller"  "johndoe"
+// @Security     JWT
 func (t *TaskService) CreateTask(c *gin.Context) {
 	var request CreateTaskRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	dreq := prepDecisionReq(c.Request)
+	dreq := t.prepDecisionReq(c, c.Request)
 	dreq.Owner = request.Task.UserId
 	allowed, err := t.AuthzClient.IsAllowed(dreq)
 	if err != nil {
@@ -131,7 +135,8 @@ func (t *TaskService) CreateTask(c *gin.Context) {
 // @Param        taskid  path  int  true  "Task ID"
 // @Success      200
 // @Router       /tasks/{taskid} [delete]
-// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
+// @Param        CallerId  header  string  false  "the id of the caller"  "johndoe"
+// @Security     JWT
 func (t *TaskService) DeleteTask(c *gin.Context) {
 	id := c.Param("taskid")
 
@@ -146,7 +151,7 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("task with id %d not found", idInt)})
 		return
 	}
-	dreq := prepDecisionReq(c.Request)
+	dreq := t.prepDecisionReq(c, c.Request)
 	dreq.Owner = task.UserId
 	dreq.TaskID = strconv.Itoa(task.ID)
 	allowed, err := t.AuthzClient.IsAllowed(dreq)
@@ -170,9 +175,10 @@ func (t *TaskService) DeleteTask(c *gin.Context) {
 // @Produce      json
 // @Success      200
 // @Router       /tasks/ [delete]
-// @Param        CallerId  header  string  false "the id of the caller" "johndoe"
+// @Param        CallerId  header  string  false  "the id of the caller"  "johndoe"
+// @Security     JWT
 func (t *TaskService) DeleteTasks(c *gin.Context) {
-	dreq := prepDecisionReq(c.Request)
+	dreq := t.prepDecisionReq(c, c.Request)
 	allowed, err := t.AuthzClient.IsAllowed(dreq)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
@@ -185,8 +191,13 @@ func (t *TaskService) DeleteTasks(c *gin.Context) {
 	}
 }
 
-func prepDecisionReq(req *http.Request) *authz.DecisionRequest {
-	user := req.Header.Get("CallerId")
+func (t *TaskService) prepDecisionReq(c *gin.Context, req *http.Request) *authz.DecisionRequest {
+	email, ok := c.Get("email")
+	if !ok && t.AuthnDevMode {
+		// in "devmode" we allow passing the user in the callerId header without a valid JWT token
+		email = req.Header.Get("CallerId")
+	}
+	user := email.(string)
 	path := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
 	return &authz.DecisionRequest{
 		Method: req.Method,

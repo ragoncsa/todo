@@ -22,6 +22,11 @@ const docTemplate = `{
     "paths": {
         "/tasks/": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Reads and returns all the tasks.",
                 "consumes": [
                     "application/json"
@@ -60,6 +65,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Creates a new task.",
                 "consumes": [
                     "application/json"
@@ -95,6 +105,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Deletes all the tasks.",
                 "consumes": [
                     "application/json"
@@ -123,6 +138,11 @@ const docTemplate = `{
         },
         "/tasks/{taskid}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Reads a single task and returns it.",
                 "consumes": [
                     "application/json"
@@ -171,6 +191,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Deletes a single task.",
                 "consumes": [
                     "application/json"
@@ -271,6 +296,13 @@ const docTemplate = `{
                     "example": "johndoe"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
