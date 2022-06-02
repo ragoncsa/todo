@@ -10,14 +10,14 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-type AuthEnforcement int
+type authEnforcement int
 
 const (
-	mandatory AuthEnforcement = iota
+	mandatory authEnforcement = iota
 	optional
 )
 
-func authHandler(clientId string, enforcing AuthEnforcement) gin.HandlerFunc {
+func authHandler(clientId string, enforcing authEnforcement) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// before request
 
