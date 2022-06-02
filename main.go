@@ -68,9 +68,8 @@ func main() {
 	server := http.InitServer(conf)
 	tsDB := &gorm.TaskService{DB: db}
 	tsHTTP := http.TaskService{
-		Service:      tsDB,
-		AuthzClient:  authz.New(conf),
-		AuthnDevMode: conf.Authn.DevMode,
+		Service:     tsDB,
+		AuthzClient: authz.New(conf),
 	}
 	server.RegisterRoutes(&tsHTTP)
 	server.Start()

@@ -14,7 +14,8 @@ import (
 
 func TestGetTask(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock Task() call.
 	ts.TaskFn = func(id int) (*domain.Task, error) {
@@ -28,7 +29,13 @@ func TestGetTask(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/tasks/100", nil)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -40,7 +47,8 @@ func TestGetTask(t *testing.T) {
 
 func TestGetTasks(t *testing.T) {
 	var ts mock.TaskService
-	tsHTTP := &TaskService{Service: &ts}
+	var ac mock.AlwaysAllow
+	tsHTTP := &TaskService{Service: &ts, AuthzClient: &ac}
 
 	// Mock Tasks() call.
 	ts.TasksFn = func() ([]*domain.Task, error) {
@@ -51,7 +59,13 @@ func TestGetTasks(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/tasks/", nil)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -84,7 +98,13 @@ func TestCreateTask(t *testing.T) {
 	reader := strings.NewReader(string(request))
 	r, _ := http.NewRequest("POST", "/tasks/", reader)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -117,7 +137,13 @@ func TestCreateTaskForbidden(t *testing.T) {
 	reader := strings.NewReader(string(request))
 	r, _ := http.NewRequest("POST", "/tasks/", reader)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -155,7 +181,13 @@ func TestDeleteTask(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("DELETE", "/tasks/100", nil)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 
@@ -179,7 +211,13 @@ func TestDeleteTasks(t *testing.T) {
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("DELETE", "/tasks/", nil)
 
-	server := InitServer(&config.Config{Server: config.ServerConf{Port: 8080}})
+	server := InitServer(&config.Config{
+		Server: config.ServerConf{Port: 8080},
+		Frontend: config.FrontendConf{
+			Endpoints: []string{"*"},
+		},
+		Authn: config.AuthnConf{NotEnforced: true},
+	})
 	server.RegisterRoutes(tsHTTP)
 	server.router.ServeHTTP(w, r)
 

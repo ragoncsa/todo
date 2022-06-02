@@ -15,7 +15,7 @@ authz:
 authn:
   # See: https://developers.google.com/workspace/guides/create-credentials#oauth-client-id
   clientId: "<ADD YOUR CLIENT ID HERE>"
-  devMode: true
+  notEnforced: true
 
 frontend:
   endpoints:

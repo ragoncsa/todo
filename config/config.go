@@ -26,8 +26,8 @@ type AuthzConf struct {
 }
 
 type AuthnConf struct {
-	ClientId string
-	DevMode  bool
+	ClientId    string
+	NotEnforced bool
 }
 
 type FrontendConf struct {

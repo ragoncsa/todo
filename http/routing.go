@@ -1,17 +1,14 @@
 package http
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ragoncsa/todo/config"
-	"google.golang.org/api/idtoken"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -32,42 +29,6 @@ type Server struct {
 	port   int
 }
 
-type AuthEnforcement int
-
-const (
-	mandatory AuthEnforcement = iota
-	optional
-)
-
-func googleAuth(clientId string, enforcing AuthEnforcement) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// before request
-
-		// OPTIONS is used only for doing CORS preflight check
-		// Also OpenAPI spec can be accessed without authentication
-		if c.Request.Method != "OPTIONS" && c.Request.URL.Path != "/swagger/doc.json" {
-			authH, ok := c.Request.Header["Authorization"]
-			if !ok {
-				if enforcing == mandatory {
-					c.AbortWithStatusJSON(http.StatusUnauthorized, "no Authorization header in request")
-				}
-				return
-			}
-			token := strings.Replace(authH[0], "Bearer ", "", 1)
-
-			payload, err := idtoken.Validate(context.Background(), token, clientId)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, "invalid token")
-				return
-			}
-			c.Set("email", payload.Claims["email"])
-
-		}
-		c.Next()
-		// after request
-	}
-}
-
 func InitServer(conf *config.Config) *Server {
 	server := &Server{
 		router: gin.Default(),
@@ -79,10 +40,10 @@ func InitServer(conf *config.Config) *Server {
 		AllowHeaders: []string{"Origin", "Authorization", "Content-Type", "CallerId"},
 		MaxAge:       12 * time.Hour,
 	}))
-	if conf.Authn.DevMode {
-		server.router.Use(googleAuth(conf.Authn.ClientId, optional))
+	if conf.Authn.NotEnforced {
+		server.router.Use(authHandler(conf.Authn.ClientId, optional))
 	} else {
-		server.router.Use(googleAuth(conf.Authn.ClientId, mandatory))
+		server.router.Use(authHandler(conf.Authn.ClientId, mandatory))
 	}
 	return server
 }
