@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -34,16 +35,16 @@ func InitServer(conf *config.Config) *Server {
 		port:   conf.Server.Port,
 	}
 	server.router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{conf.Frontend.Endpoint},
+		AllowOrigins: conf.Frontend.Endpoints,
 		AllowMethods: []string{"GET", "POST", "DELETE"},
-		AllowHeaders: []string{"Origin"},
-		// ExposeHeaders:    []string{"Content-Length"},
-		// AllowCredentials: true,
-		// AllowOriginFunc: func(origin string) bool {
-		// 	return origin == "https://github.com"
-		// },
-		// MaxAge: 12 * time.Hour,
+		AllowHeaders: []string{"Origin", "Authorization", "Content-Type", "CallerId"},
+		MaxAge:       12 * time.Hour,
 	}))
+	if conf.Authn.NotEnforced {
+		server.router.Use(authHandler(conf.Authn.ClientId, optional))
+	} else {
+		server.router.Use(authHandler(conf.Authn.ClientId, mandatory))
+	}
 	return server
 }
 

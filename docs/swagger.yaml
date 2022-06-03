@@ -70,6 +70,8 @@ paths:
       responses:
         "200":
           description: ""
+      security:
+      - JWT: []
       summary: Delete all tasks
       tags:
       - write
@@ -95,6 +97,8 @@ paths:
           description: unexpected error
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get all tasks
       tags:
       - read
@@ -118,6 +122,8 @@ paths:
       responses:
         "200":
           description: ""
+      security:
+      - JWT: []
       summary: Creates task
       tags:
       - write
@@ -141,6 +147,8 @@ paths:
       responses:
         "200":
           description: ""
+      security:
+      - JWT: []
       summary: Deletes task
       tags:
       - write
@@ -173,7 +181,14 @@ paths:
           description: unexpected error
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get task
       tags:
       - read
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

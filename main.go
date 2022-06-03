@@ -24,6 +24,11 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 
+// We are not using an API key here, but in OpenAPI v2 there is no better way to configure this.
+// @securitydefinitions.apikey  JWT
+// @in                          header
+// @name                        Authorization
+
 // Added workaround due to issues with environment variables in Viper
 // https://github.com/spf13/viper/issues/761
 func overrideUsingEnvVars(config *config.Config) {

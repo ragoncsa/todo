@@ -12,5 +12,12 @@ database:
 authz:
   endpoint: "http://127.0.0.1:8181/v1/data/authz"
 
+authn:
+  # See: https://developers.google.com/workspace/guides/create-credentials#oauth-client-id
+  clientId: "<ADD YOUR CLIENT ID HERE>"
+  notEnforced: true
+
 frontend:
-  endpoint: "http://localhost:3000"
+  endpoints:
+    - "http://localhost:3000"
+    - "http://localhost:3001"
