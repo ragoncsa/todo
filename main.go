@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/ragoncsa/todo/authz"
 	"github.com/ragoncsa/todo/config"
+	docs "github.com/ragoncsa/todo/docs"
 	"github.com/ragoncsa/todo/gorm"
 	"github.com/ragoncsa/todo/http"
-
 	"github.com/spf13/viper"
-
-	docs "github.com/ragoncsa/todo/docs"
 )
 
 // @title        Tasks service
@@ -38,7 +41,11 @@ func overrideUsingEnvVars(config *config.Config) {
 }
 
 func loadConfig() *config.Config {
-	viper.SetConfigName("local-env")
+	env := "local"
+	if v, present := os.LookupEnv("ENV"); present {
+		env = v
+	}
+	viper.SetConfigName(fmt.Sprintf("%s-env", env))
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config/")
 	viper.AutomaticEnv()
@@ -55,12 +62,13 @@ func loadConfig() *config.Config {
 	return &conf
 }
 
-func main() {
+func initServer() *http.Server {
 	conf := loadConfig()
 	db, err := gorm.Connect(conf)
 	if err != nil {
-		panic("failed to connect database")
+		log.Panicln("failed to connect database")
 	}
+	log.Println("Successfully connected to database")
 	gorm.RunMigration(db)
 
 	docs.SwaggerInfo.BasePath = "/"
@@ -72,5 +80,30 @@ func main() {
 		AuthzClient: authz.New(conf),
 	}
 	server.RegisterRoutes(&tsHTTP)
-	server.Start()
+	return server
+}
+
+var server *http.Server
+var ginLambda *ginadapter.GinLambdaV2
+
+func init() {
+	log.Printf("Initializing Gin server - BEGIN")
+	server = initServer()
+
+	if lambdaProxyOn, present := os.LookupEnv("ENABLE_GIN_LAMBDA_PROXY"); present && lambdaProxyOn == "TRUE" {
+		ginLambda = ginadapter.NewV2(server.Router())
+	}
+	log.Printf("Initializing Gin server - END")
+}
+
+func Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	return ginLambda.ProxyWithContext(ctx, req)
+}
+
+func main() {
+	if lambdaProxyOn, present := os.LookupEnv("ENABLE_GIN_LAMBDA_PROXY"); present && lambdaProxyOn == "TRUE" {
+		lambda.Start(Handler)
+	} else {
+		server.Start()
+	}
 }

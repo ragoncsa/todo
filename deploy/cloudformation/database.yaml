@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Database for the Todo service.
+  **WARNING** This template creates an Amazon Aurora DB cluster. You will be billed for the AWS
+  resources used if you create a stack from this template.
+
+Resources:
+  RDSSecret:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Name: todo/postgres
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "postgres"}'
+        GenerateStringKey: "password"
+        PasswordLength: 16
+        ExcludePunctuation: true
+
+  RDSCluster:
+    Type: "AWS::RDS::DBCluster"
+    Properties:
+      DBClusterIdentifier: todo-service-database
+      MasterUsername:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref RDSSecret,
+            ":SecretString:username}}",
+          ],
+        ]
+      MasterUserPassword:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref RDSSecret,
+            ":SecretString:password}}",
+          ],
+        ]
+      Engine: aurora-postgresql
+      EngineVersion: 14.3
+      EngineMode: provisioned
+      EnableIAMDatabaseAuthentication: true
+      Port: 5432
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: todo-service-database-instance
+      Engine: aurora-postgresql
+      DBClusterIdentifier: !Ref "RDSCluster"
+      DBInstanceClass: "db.t3.medium"
+
+  SecretRDSInstanceAttachment:
+    Type: "AWS::SecretsManager::SecretTargetAttachment"
+    Properties:
+      SecretId: !Ref RDSSecret
+      TargetId: !Ref RDSCluster
+      TargetType: AWS::RDS::DBCluster
+
+Outputs:
+  DatabaseEndpoint:
+    Value: !GetAtt RDSInstance.Endpoint.Address
+    Export:
+      Name: todo-service-database-endpoint

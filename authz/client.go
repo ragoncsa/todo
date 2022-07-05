@@ -35,16 +35,22 @@ type Client interface {
 type client struct {
 	restClient *resty.Client
 	endpoint   string
+	disabled   bool
 }
 
 func New(conf *config.Config) Client {
 	return &client{
 		restClient: resty.New(),
 		endpoint:   conf.Authz.Endpoint,
+		disabled:   conf.Authz.Disable,
 	}
 }
 
 func (c *client) IsAllowed(dreq *DecisionRequest) (bool, error) {
+	if c.disabled {
+		// Always allow, when authorization is diabled.
+		return true, nil
+	}
 	dreqStr, err := json.Marshal(&decisionReqInternal{Input: dreq})
 	if err != nil {
 		return false, err

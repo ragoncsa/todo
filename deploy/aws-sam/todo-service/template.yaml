@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  todo-service
+
+  Sample SAM Template for todo-service
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 5
+
+Parameters:
+  VpcSecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: The security group if the VPC the lambda is deployed to.
+  VpcSubnetIds:
+    Type: CommaDelimitedList
+    Description: The IDs of the subnets the lambda is deployed to.
+  TodoDbClusterResourceId:
+    Type: String
+    Description: The resource ID of the database cluster (needed for the policy to enable IAM based auth).
+
+Resources:
+  TodoServiceFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: HttpApi
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DB_HOST: !ImportValue todo-service-database-endpoint
+      VpcConfig:
+        SecurityGroupIds: !Ref VpcSecurityGroupIds
+        SubnetIds: !Ref VpcSubnetIds
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - rds-db:connect
+              Resource: !Sub "arn:aws:rds-db:${AWS::Region}:${AWS::AccountId}:dbuser:${TodoDbClusterResourceId}/postgres"
+    Metadata:
+      DockerTag: go1.x-v1
+      DockerContext: ../../../
+      Dockerfile: ./deploy/aws-sam/todo-service/Dockerfile
+
+Outputs:
+  # ServerlessHttpApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  TodoServiceAPI:
+    Description: "API Gateway endpoint URL for Todo Service function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  TodoServiceFunction:
+    Description: "First Lambda Function ARN"
+    Value: !GetAtt TodoServiceFunction.Arn
+  TodoServiceFunctionIamRole:
+    Description: "Implicit IAM Role created for Todo Service function"
+    Value: !GetAtt TodoServiceFunctionRole.Arn
