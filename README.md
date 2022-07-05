@@ -146,4 +146,49 @@ Then on the next page click on "Exchange authorization code for tokens"
 
 On the last page you can find the id_token returned that you can use to authenticate with the service (see above).
 
-![OAuth playground - getting id_tokne](assets/google-oauth-playground-id-token.png?raw=true)
+![OAuth playground - getting id_token](assets/google-oauth-playground-id-token.png?raw=true)
+
+## Deploy to AWS
+
+Create database and set up IAM based authentication.
+
+```bash
+aws cloudformation validate-template --template-body file://deploy/cloudformation/database.yaml
+aws cloudformation deploy --template-file deploy/cloudformation/database.yaml --stack-name todo-service-database
+
+export PGPASSWORD=$( \
+  aws secretsmanager get-secret-value \
+  --secret-id "todo/postgres" \
+  --query "SecretString" \
+  --output text \
+  | jq -r .password)
+
+HOST=$( \
+  aws secretsmanager get-secret-value \
+  --secret-id "todo/postgres" \
+  --query "SecretString" \
+  --output text \
+  | jq -r .host)
+
+psql -h ${HOST} -U postgres -c "GRANT rds_iam TO postgres;"
+unset PGPASSWORD
+```
+
+Then build and deploy the service.
+
+```bash
+cd deploy/aws-sam/todo-service
+
+sam build
+
+VPC=$(aws ec2 describe-vpcs - filters "Name=is-default,Values=true" - query "Vpcs[].VpcId" - output text)
+SEC_GROUP=$(aws ec2 describe-security-groups - query "SecurityGroups[?VpcId=='${VPC}']".GroupId - output text)
+SUBNETS=$(aws ec2 describe-subnets - query "Subnets[?VpcId=='${VPC}'].SubnetId" - output text | sed 's/\t/,/g')
+DB_RESOURCE_ID=$(aws rds describe-db-clusters - db-cluster-identifier todo-service-database - query "DBClusters[].DbClusterResourceId" - output text)
+
+sam deploy - stack-name todo-service \
+ - resolve-image-repos \
+ - resolve-s3 \
+ - capabilities CAPABILITY_IAM \
+ - parameter-overrides VpcSecurityGroupIds=${SEC_GROUP} VpcSubnetIds=${SUBNETS} TodoDbClusterResourceId=${DB_RESOURCE_ID}
+```

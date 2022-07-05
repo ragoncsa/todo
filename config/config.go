@@ -23,6 +23,7 @@ type DatabaseConf struct {
 
 type AuthzConf struct {
 	Endpoint string
+	Disable  bool
 }
 
 type AuthnConf struct {

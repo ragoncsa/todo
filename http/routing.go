@@ -34,18 +34,24 @@ func InitServer(conf *config.Config) *Server {
 		router: gin.Default(),
 		port:   conf.Server.Port,
 	}
-	server.router.Use(cors.New(cors.Config{
-		AllowOrigins: conf.Frontend.Endpoints,
-		AllowMethods: []string{"GET", "POST", "DELETE"},
-		AllowHeaders: []string{"Origin", "Authorization", "Content-Type", "CallerId"},
-		MaxAge:       12 * time.Hour,
-	}))
+	if len(conf.Frontend.Endpoints) > 0 {
+		server.router.Use(cors.New(cors.Config{
+			AllowOrigins: conf.Frontend.Endpoints,
+			AllowMethods: []string{"GET", "POST", "DELETE"},
+			AllowHeaders: []string{"Origin", "Authorization", "Content-Type", "CallerId"},
+			MaxAge:       12 * time.Hour,
+		}))
+	}
 	if conf.Authn.NotEnforced {
 		server.router.Use(authHandler(conf.Authn.ClientId, optional))
 	} else {
 		server.router.Use(authHandler(conf.Authn.ClientId, mandatory))
 	}
 	return server
+}
+
+func (s Server) Router() *gin.Engine {
+	return s.router
 }
 
 func (s Server) RegisterRoutes(t TaskServiceHTTPHandlers) {

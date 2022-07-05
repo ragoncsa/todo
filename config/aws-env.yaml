@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+database:
+  port: 5432
+  dbname: postgres
+  dbuser: postgres
+  timezone: "Europe/Helsinki"
+
+authz:
+  disable: true
+
+authn:
+  notEnforced: true
