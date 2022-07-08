@@ -181,14 +181,14 @@ cd deploy/aws-sam/todo-service
 
 sam build
 
-VPC=$(aws ec2 describe-vpcs - filters "Name=is-default,Values=true" - query "Vpcs[].VpcId" - output text)
-SEC_GROUP=$(aws ec2 describe-security-groups - query "SecurityGroups[?VpcId=='${VPC}']".GroupId - output text)
-SUBNETS=$(aws ec2 describe-subnets - query "Subnets[?VpcId=='${VPC}'].SubnetId" - output text | sed 's/\t/,/g')
-DB_RESOURCE_ID=$(aws rds describe-db-clusters - db-cluster-identifier todo-service-database - query "DBClusters[].DbClusterResourceId" - output text)
+VPC=$(aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --query "Vpcs[].VpcId" --output text)
+SEC_GROUP=$(aws ec2 describe-security-groups --query "SecurityGroups[?VpcId=='${VPC}']".GroupId --output text)
+SUBNETS=$(aws ec2 describe-subnets --query "Subnets[?VpcId=='${VPC}'].SubnetId" --output text | sed 's/\t/,/g')
+DB_RESOURCE_ID=$(aws rds describe-db-clusters --db-cluster-identifier todo-service-database --query "DBClusters[].DbClusterResourceId" --output text)
 
-sam deploy - stack-name todo-service \
- - resolve-image-repos \
- - resolve-s3 \
- - capabilities CAPABILITY_IAM \
- - parameter-overrides VpcSecurityGroupIds=${SEC_GROUP} VpcSubnetIds=${SUBNETS} TodoDbClusterResourceId=${DB_RESOURCE_ID}
+sam deploy --stack-name todo-service \
+--resolve-image-repos \
+--resolve-s3 \
+--capabilities CAPABILITY_IAM \
+--parameter-overrides VpcSecurityGroupIds=${SEC_GROUP} VpcSubnetIds=${SUBNETS} TodoDbClusterResourceId=${DB_RESOURCE_ID}
 ```
